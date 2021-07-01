@@ -1,5 +1,6 @@
-import React, { useState, useContext, useRef } from 'react';
-import { AgGridReact } from 'ag-grid-react';
+import React, { useState, useContext, useEffect, useReducer } from 'react';
+// import { AgGridReact } from 'ag-grid-react';
+import Ag from './ag'
 
 import { FormControl, FormControlLabel, InputLabel, Select, Switch as SwitchUI, MenuItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
@@ -23,47 +24,27 @@ const useStyles = makeStyles((theme) => ({
 export default function AgGrid() {
     const classes = useStyles();
     const { currentTheme, setTheme } = useContext(CustomThemeContext)
-    
-    // Ref to the table
-    const agGridRef = useRef(null)
 
     // Default properties of agGrid
     const agGridTheme = currentTheme === 'dark' ? "ag-theme-balham-dark" : "ag-theme-alpine"
     const [gridApi, setGridApi] = useState(null);
 
     // Pagination
-    const [pagination, setPagination] = useState(true);
-    const handlePagination = (event) => {
-        let { checked } = event.target
-        setPagination(checked)
-        // agGridRef.forceUpdate()
-    }
-
+    const [pagination, togglePagination] = useReducer(val => !val, true);
+    // Sortable
+    const [sortable, toggleSortable] = useReducer(val => !val, true);
+    // Filter
+    const [filter, toggleFilter] =  useReducer(val => !val, true);
+    // FloatingFilter
+    const [floatingFilter, toggleFloatingFilter] = useReducer(val => !val, true);
     // Pagination Page Size
     const [paginationPageSize, setPaginationPageSize] = useState(1);
-    const handlePageSizeChange = (event) => {
+
+    const onPageSizeChange = (event) => {
         let newPaginationPageSize = event.target.value;
         gridApi.paginationSetPageSize(Number(newPaginationPageSize));
         setPaginationPageSize(newPaginationPageSize)
     };
-
-    // Sortable
-    const [sortable, setSortable] = useState(true);
-    const toggleSortable = () => setSortable(!sortable)
-
-    // Filter
-    const [filter, setFilter] = useState(true);
-    const handleFilter = (event) => {
-        let { checked } = event.target
-        setFilter(checked)
-    }
-
-    // FloatingFilter
-    const [floatingFilter, setFloatingFilter] = useState(true)
-    const handleFloatingFilter = (event) => {
-        let { checked } = event.target
-        setFloatingFilter(checked)
-    }
 
     const rowData = [
         {make: "Toyota", model: "Celica", price: 35000},
@@ -71,10 +52,13 @@ export default function AgGrid() {
         {make: "Porsche", model: "Boxter", price: 72000}
     ];
 
-    const columns = [
+    const columnDefs = [
         {
             headerName: "Make",
             field: "make",
+            headerCheckboxSelection: true,
+            headerCheckboxSelectionFilteredOnly: true,
+            checkboxSelection: true,
         },
         {
             headerName: "Model",
@@ -86,20 +70,38 @@ export default function AgGrid() {
         }
     ]
 
-    console.log({sortable})
-    
+    // Grid Options
+    const gridOptions = useState({
+        // Properties
+        rowData,
+        columnDefs,
+        pagination,
+        paginationPageSize,
+        rowSelection: 'single',
+        defaultColDef:{
+            sortable,
+            filter,
+            floatingFilter,
+            flex: 1,
+            minWidth: 100,
+        },
+    })
+
+    useEffect(() => {
+        console.log(`Parent Pagination : ${gridOptions.pagination}`)
+    },[gridOptions])
+
+
     return (
     <div style={{ width: '100%', height: '100%' }}>
-
-
         <FormControlLabel
-            control={<SwitchUI checked={pagination} onChange={handlePagination} />}
+            control={<SwitchUI checked={pagination} onChange={togglePagination} />}
             label="Pagination"
         />
 
         <FormControl className={classes.formControl}>
             <InputLabel>Page Size</InputLabel>
-            <Select value={paginationPageSize} onChange={handlePageSizeChange}>
+            <Select value={paginationPageSize} onChange={onPageSizeChange}>
             {
                 [1,2,100,500,1000].map((size) => <MenuItem value={size}>{size}</MenuItem>)
             }
@@ -112,38 +114,16 @@ export default function AgGrid() {
         />
 
         <FormControlLabel
-            control={<SwitchUI checked={filter} onChange={handleFilter} />}
+            control={<SwitchUI checked={filter} onChange={toggleFilter} />}
             label="Filter"
         />
 
         <FormControlLabel
-            control={<SwitchUI checked={floatingFilter} onChange={handleFloatingFilter} />}
+            control={<SwitchUI checked={floatingFilter} onChange={toggleFloatingFilter} />}
             label="Floating Filter"
         />
 
-        <div style={{ height: '80%', width: '100%', }} className={agGridTheme}>
-            <AgGridReact
-
-            ref={agGridRef}
-
-            onGridReady={(params) => setGridApi(params.api)}
-            
-            defaultColDef={{
-                sortable,
-                filter,
-                floatingFilter,
-                flex: 1,
-                minWidth: 100,
-            }}
-            
-            pagination
-            paginationPageSize
-            paginationNumberFormatter={(params) => params.value.toLocaleString()}
-
-            rowData={rowData} 
-            columnDefs={columns}
-            />
-        </div>
+        <Ag agGridTheme={agGridTheme} gridOptions={gridOptions} setGridApi={setGridApi}/>
     </div>
     );
 };
