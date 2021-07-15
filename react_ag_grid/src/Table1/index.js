@@ -1,15 +1,17 @@
 import React, { useState, useContext, useEffect, useReducer } from 'react';
+// import { AgGridReact } from 'ag-grid-react';
 import Ag from './ag'
 
 import { FormControl, FormControlLabel, InputLabel, Select, Switch as SwitchUI, MenuItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+
+import BtnCellRenderer from "./BtnCellRenderer.jsx";
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham-dark.css'
 
 import { CustomThemeContext } from '../Themes/CustomThemeProvider'
-import { dateComparator, filterParams } from "./datehelpers";
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -46,8 +48,37 @@ export default function AgGrid() {
         setPaginationPageSize(newPaginationPageSize)
     };
 
-    const [rowData, setRowData] = useState([])
-    const [columnDefs, setColumnDefs] = useState([])
+    const rowData = [
+        {name: "BG cmdb", engine: "BigQuery"},
+        {name: "BG IAM", engine: "BigQuery"},
+        {name: "users", engine: "sqLite"},
+        {name: "HR data", engine: "PostgresSQL"},
+        {name: "Cars data", engine: "PostgresSQL"},
+    ];
+
+    const columnDefs = [
+        {
+            headerName: "Name",
+            field: "name",
+        },
+        {
+            headerName: "Engine",
+            field: "engine",
+        },
+        {
+            headerName: "Actions",
+            field: "name",
+            filter:false,
+            floatingFilter:false,
+            minWidth: 50,
+            cellRenderer: "btnCellRenderer",
+            cellRendererParams: {
+                clicked: (field) => {
+                  alert(`${field} was clicked`);
+                }
+            }
+        }
+    ]
 
     // Grid Options
     const gridOptions = {
@@ -62,51 +93,14 @@ export default function AgGrid() {
             filter,
             floatingFilter,
             flex: 1,
-            minWidth: 100,
-            filterParams: {
-              buttons: ["apply", "reset", "cancel"],
-              closeOnApply: true
-            }
+            // minWidth: 100,
         },
+        frameworkComponents: {
+            btnCellRenderer: BtnCellRenderer
+          },
     }
-
-    const getData = () => {
-      fetch('data.json'
-      ,{
-        headers : { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-         }
-      }
-      )
-        .then((response) => {
-          // console.log(response)
-          return response.json();
-        })
-        .then((myJson) => {
-          myJson.columnDefs = myJson.columnDefs.map(col => {
-            return (col.filter === "agDateColumnFilter") ? {...col, filterParams, comparator: dateComparator,} : col ;
-          })
-
-          return myJson
-        })
-        .then((myJson)=>{
-          // console.log(myJson.columnDefs)
-          setRowData(myJson.rowData);
-          setColumnDefs(myJson.columnDefs);
-        });
-    }
-
-    useEffect(()=>{
-      getData()
-    },[])
 
     return (
-    !(rowData.length > 0 && columnDefs.length > 0)
-    ?
-    (<div>Loading...</div>)
-    :
-    (
     <div style={{ width: '100%', height: '100%' }}>
         <FormControlLabel
             control={<SwitchUI checked={pagination} onChange={togglePagination} />}
@@ -139,6 +133,5 @@ export default function AgGrid() {
 
         <Ag agGridTheme={agGridTheme} gridOptions={gridOptions} setGridApi={setGridApi}/>
     </div>
-    )
     );
 };

@@ -1,0 +1,46 @@
+{
+    "rowData": [
+    {"make": "Toyota", "model": "Celica", "date": "02/25/2020","price": 35000},
+    {"make": "Ford", "model": "Mondeo", "date": "02/25/2020","price": 32000},
+    {"make": "Porsche", "model": "Boxter", "date": "02/25/2020","price": 72000},
+    {"make": "Toyota", "model": "Celica", "date": "02/25/2020","price": 35000},
+    {"make": "Ford", "model": "Mondeo", "date": "02/25/2020","price": 32000},
+    {"make": "Porsche", "model": "Boxter", "date": "02/25/2020","price": 72000},
+    {"make": "Toyota", "model": "Celica", "date": "02/25/2020","price": 35000},
+    {"make": "Ford", "model": "Mondeo", "date": "03/25/2020","price": 32000},
+    {"make": "Porsche", "model": "Boxter", "date": "03/25/2020","price": 72000},
+    {"make": "Toyota", "model": "Celica", "date": "02/25/2020","price": 35000},
+    {"make": "Ford", "model": "Mondeo", "date": "02/25/2018","price": 32000},
+    {"make": "Porsche", "model": "Boxter", "date": "02/25/2018","price": 72000},
+    {"make": "Toyota", "model": "Celica", "date": "02/25/2020","price": 35000},
+    {"make": "Ford", "model": "Mondeo", "date": "02/28/2020","price": 32000},
+    {"make": "Porsche", "model": "Boxter", "date": "02/27/2020","price": 72000}
+],
+"columnDefs" : [
+    {
+        "headerName": "Make",
+        "field": "make",
+        "headerCheckboxSelection": true,
+        "headerCheckboxSelectionFilteredOnly": true, 
+        "checkboxSelection": true
+    },
+    {
+        "headerName": "Model",
+        "field": "model"
+    },
+    {
+        "headerName": "Release Date",
+        "field": "date",
+        "filter":"agDateColumnFilter"
+    },
+    {
+        "headerName": "Price",
+        "field": "price",
+        "filter":"agNumberColumnFilter",
+        "filterParams":{
+          "alwaysShowBothConditions": true,
+          "defaultJoinOperator": "OR"
+        }
+    }
+]
+}
